@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTR - Employee Attendance</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="attendance-page">
+    <div class="container">
+        <!-- Header -->
+        <header class="attendance-header">
+            <h1>📱 Daily Time Record</h1>
+            <p>Scan QR Code to Log Attendance</p>
+        </header>
+
+        <!-- QR Scanner Section -->
+        <div id="scannerSection" class="section">
+            <div class="scanner-box">
+                <div id="qrScanner">
+                    <video id="qrVideo" autoplay playsinline></video>
+                    <canvas id="qrCanvas" style="display:none;"></canvas>
+                </div>
+                <div class="scanner-overlay">
+                    <div class="scanner-frame"></div>
+                    <p class="scanner-text">Position QR Code within frame</p>
+                </div>
+            </div>
+            <button id="startScanBtn" class="btn btn-primary btn-large">
+                📷 Start Scanning
+            </button>
+            <button id="stopScanBtn" class="btn btn-danger" style="display:none;">
+                ⏹️ Stop Scanning
+            </button>
+        </div>
+
+        <!-- Attendance Form Section (Hidden initially) -->
+        <div id="attendanceForm" class="section" style="display:none;">
+            <div class="form-card">
+                <h2>📝 Record Attendance</h2>
+
+                <div class="form-group">
+                    <label>Type</label>
+                    <div class="type-toggle">
+                        <button type="button" id="timeInBtn" class="type-btn active">Time In</button>
+                        <button type="button" id="timeOutBtn" class="type-btn">Time Out</button>
+                    </div>
+                    <input type="hidden" id="attendanceType" value="time_in">
+                </div>
+
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="text" id="attendanceDate" readonly class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label>Session</label>
+                    <select id="attendanceSession" class="form-control">
+                        <option value="morning">Morning</option>
+                        <option value="afternoon">Afternoon</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Current Time</label>
+                    <input type="text" id="currentTime" readonly class="form-control time-display">
+                </div>
+
+                <div class="form-group">
+                    <label>Employee ID</label>
+                    <input type="text" id="employeeId" class="form-control" placeholder="Enter your Employee ID" required>
+                </div>
+
+                <button id="proceedToFingerprint" class="btn btn-primary btn-large">
+                    👆 Proceed to Fingerprint
+                </button>
+            </div>
+        </div>
+
+        <!-- Fingerprint Section (Hidden initially) -->
+        <div id="fingerprintSection" class="section" style="display:none;">
+            <div class="fingerprint-card">
+                <div class="fingerprint-icon">👆</div>
+                <h2>Fingerprint Verification</h2>
+                <p id="fingerprintStatus">Touch the fingerprint sensor to verify</p>
+                <div id="fingerprintProgress" class="progress-bar" style="display:none;">
+                    <div class="progress-fill"></div>
+                </div>
+                <button id="scanFingerprintBtn" class="btn btn-primary btn-large">
+                    🔐 Scan Fingerprint
+                </button>
+                <button id="backToForm" class="btn btn-secondary">
+                    ← Back
+                </button>
+            </div>
+        </div>
+
+        <!-- Success Section -->
+        <div id="successSection" class="section" style="display:none;">
+            <div class="success-card">
+                <div class="success-icon">✅</div>
+                <h2>Attendance Recorded!</h2>
+                <div class="success-details">
+                    <p><strong>Employee ID:</strong> <span id="successEmployeeId"></span></p>
+                    <p><strong>Type:</strong> <span id="successType"></span></p>
+                    <p><strong>Date:</strong> <span id="successDate"></span></p>
+                    <p><strong>Time:</strong> <span id="successTime"></span></p>
+                    <p><strong>Session:</strong> <span id="successSession"></span></p>
+                </div>
+                <button id="scanAgainBtn" class="btn btn-primary">
+                    📷 Scan Another
+                </button>
+            </div>
+        </div>
+
+        <!-- Error Section -->
+        <div id="errorSection" class="section" style="display:none;">
+            <div class="error-card">
+                <div class="error-icon">❌</div>
+                <h2>Error</h2>
+                <p id="errorMessage"></p>
+                <button id="tryAgainBtn" class="btn btn-primary">
+                    🔄 Try Again
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <script src="js/attendance.js"></script>
+</body>
+</html>

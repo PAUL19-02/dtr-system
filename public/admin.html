@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTR - Admin Panel</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .modal-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .modal-actions .btn {
+            margin: 0;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body class="admin-page">
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="login-box">
+                <h2>🔐 Admin Login</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="loginUsername" class="form-control" placeholder="admin" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="loginPassword" class="form-control" placeholder="admin123" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                </form>
+                <p class="login-hint">Default: admin / admin123</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Admin Interface -->
+    <div id="adminInterface" style="display:none;">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>📊 DTR System</h2>
+                <p>Admin Panel</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                    📈 Dashboard
+                </a>
+                <a href="#employees" class="nav-link" data-section="employees">
+                    👥 Employees
+                </a>
+                <a href="#attendance" class="nav-link" data-section="attendance">
+                    📋 Attendance Records
+                </a>
+                <a href="#qrcode" class="nav-link" data-section="qrcode">
+                    📱 QR Code
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <span id="adminName">Admin</span>
+                <button id="logoutBtn" class="btn btn-danger btn-sm">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboardSection" class="content-section active">
+                <h1>Dashboard</h1>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <h3 id="totalEmployees">0</h3>
+                            <p>Total Employees</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📋</div>
+                        <div class="stat-info">
+                            <h3 id="todayAttendance">0</h3>
+                            <p>Today's Records</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-info">
+                            <h3 id="presentToday">0</h3>
+                            <p>Present Today</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Employees Section -->
+            <section id="employeesSection" class="content-section">
+                <div class="section-header">
+                    <h1>Employee Management</h1>
+                    <button id="addEmployeeBtn" class="btn btn-primary">+ Add Employee</button>
+                </div>
+
+                <!-- Add Employee Form -->
+                <div id="addEmployeeForm" class="form-panel" style="display:none;">
+                    <h3>Add New Employee</h3>
+                    <form id="employeeForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Employee ID *</label>
+                                <input type="text" id="newEmployeeId" class="form-control" placeholder="EMP001" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Full Name *</label>
+                                <input type="text" id="newEmployeeName" class="form-control" placeholder="John Doe" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Department</label>
+                            <input type="text" id="newEmployeeDept" class="form-control" placeholder="IT Department">
+                        </div>
+                        <div class="form-group">
+                            <label>Fingerprint Registration</label>
+                            <button type="button" id="registerFingerprintBtn" class="btn btn-secondary">
+                                👆 Register Fingerprint
+                            </button>
+                            <p id="fingerprintStatus" class="status-text">Not registered</p>
+                            <input type="hidden" id="fingerprintCredential">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Employee</button>
+                            <button type="button" id="cancelAddBtn" class="btn btn-secondary">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Employees Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Employee ID</th>
+                                <th>Full Name</th>
+                                <th>Department</th>
+                                <th>Fingerprint</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeesTableBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Attendance Records Section -->
+            <section id="attendanceSection" class="content-section">
+                <div class="section-header">
+                    <h1>Attendance Records</h1>
+                    <div class="filter-controls">
+                        <input type="date" id="filterStartDate" class="form-control">
+                        <input type="date" id="filterEndDate" class="form-control">
+                        <select id="filterEmployee" class="form-control">
+                            <option value="">All Employees</option>
+                        </select>
+                        <button id="filterBtn" class="btn btn-primary">Filter</button>
+                        <button id="exportPdfBtn" class="btn btn-success">📄 Export PDF</button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table" id="attendanceTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Employee ID</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>Session</th>
+                                <th>Time In</th>
+                                <th>Time Out</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTableBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- QR Code Section -->
+            <section id="qrcodeSection" class="content-section">
+                <h1>Attendance QR Code</h1>
+                <div class="qr-container">
+                    <div class="qr-card">
+                        <p class="qr-instructions">Display this QR code for employees to scan</p>
+                        <div id="qrCodeDisplay" class="qr-image">
+                            <img id="qrCodeImg" src="" alt="QR Code">
+                        </div>
+                        <div class="qr-actions">
+                            <button id="refreshQrBtn" class="btn btn-primary">🔄 Refresh QR Code</button>
+                            <button id="downloadQrBtn" class="btn btn-secondary">⬇️ Download</button>
+                            <p class="qr-url" id="qrUrl"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Employee Details Modal -->
+    <div id="employeeModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Employee Attendance History</h2>
+                <div class="modal-actions">
+                    <button onclick="exportEmployeePDF()" class="btn btn-success btn-sm">📄 Export PDF</button>
+                    <button class="close-btn" onclick="closeEmployeeModal()">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="employee-info">
+                    <h3 id="modalEmployeeName"></h3>
+                    <p>ID: <span id="modalEmployeeId"></span></p>
+                    <p>Department: <span id="modalEmployeeDept"></span></p>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Session</th>
+                                <th>Time In</th>
+                                <th>Time Out</th>
+                                <th>Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalAttendanceBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>
